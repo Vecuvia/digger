@@ -154,6 +154,7 @@ class Level(object):
 						return message
 				except:
 					pass
+		return ""
 
 MAP_WID, MAP_HGT = 40, 20
 INF_WID, INF_HGT = 35, 20
@@ -193,10 +194,11 @@ def main(stdscr):
 		infwin.addstr(9, 0, "Carrying:")
 		for i, item in enumerate(player.inventory):
 			infwin.addstr(10+i, 0, "a chunk of %s ($%s)" % (item.kind, item.value))
-		msgwin.clear()
-		msgwin.addstr(0, 0, message)
-		msgwin.addstr(1, 0, last_message)
-		last_message = message
+		if message:
+			msgwin.clear()
+			msgwin.addstr(0, 0, message)
+			msgwin.addstr(1, 0, last_message)
+			last_message = message
 		stdscr.refresh()
 		mapwin.refresh()
 		infwin.refresh()
