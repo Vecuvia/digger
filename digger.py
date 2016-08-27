@@ -26,8 +26,13 @@ class Ore(object):
 		self.char, self.x, self.y = char, x, y
 		self.kind, self.value = kind, value
 	def draw(self, screen, x, y):
+		"Given a curses screen and a point (x, y) draws itself"
 		screen.addstr(y, x, self.char)
 	def on_move(self, other):
+		"""
+		Triggered by entities moving over this instance; inserts itself
+		in the inventory of the entity.
+		"""
 		self.level.entities.remove(self)
 		other.inventory.append(self)
 		return True, "$n pick$s up a chunk of %s. "% self.kind
@@ -36,10 +41,18 @@ class Market(object):
 	def __init__(self, x, y):
 		self.char, self.x, self.y = "$", x, y
 	def draw(self, screen, x, y):
+		"Given a curses screen and a point (x, y) draws itself"
 		screen.addstr(y, x, self.char)
 	def on_move(self, other):
+		"""
+		Triggered by entities moving over this instance; shows a message.
+		"""
 		return True, "$n enter$s the market. "
 	def signal(self, trigger, key):
+		"""
+		Answers to S keypresses by reading a key and attempting to sell
+		the corresponding chunk of ore.
+		"""
 		if key == ord("S"):
 			what = self.level.screen.getch()
 			what = chr(what)
@@ -58,8 +71,10 @@ class Player(object):
 		self.inventory = []
 		self.gold = 0
 	def draw(self, screen, x, y):
+		"Given a curses screen and a point (x, y) draws the player"
 		screen.addstr(y, x, self.char)
 	def move(self, x, y):
+		"Given a delta (x, y) tries to move the player to that location"
 		next_x, next_y = self.x + x, self.y + y
 		message = ""
 		if 0 <= next_x < self.level.width and 0 <= next_y < self.level.height:
@@ -76,15 +91,12 @@ class Player(object):
 					self.x, self.y = next_x, next_y
 					message += "$n move$s %s. " % Directions[(x, y)]
 				message += messages
-				#else:
-				#	for entity in entities:
-				#		can_move, new_message = entity.on_move(self)
-				#		message += new_message
 			self.explore(self.x, self.y)
 		else:
 			message += "$n can't move there."
 		return message
 	def explore(self, x, y):
+		"Given a point (x, y) explores all the adjacent tiles"
 		for i in range(x-1, x+2):
 			for j in range(y-1, y+2):
 				if 0 <= i < self.level.width and 0 <= j < self.level.height:
@@ -111,6 +123,7 @@ class Level(object):
 		self.map, self.entities = None, []
 		self.screen = screen
 	def generate(self, ore_amount=3):
+		"Given an amount of ore, generates a map"
 		self.map = [[Tile() for i in range(self.width)] 
 					for j in range(self.height)]
 		for i in range(ore_amount):
@@ -123,12 +136,19 @@ class Level(object):
 			self.add_entity(Ore("*", x=randint(1, self.width-1), 
 				y=randint(1, self.height-1), kind=kind, value=value))
 	def get_entities(self, x, y):
+		"Return all the entities at a point x, y"
 		return [entity for entity in self.entities 
 				if entity.x == x and entity.y == y]
 	def add_entity(self, entity):
+		"Appends an entity to the list of entities of the map"
 		self.entities.append(entity)
 		entity.level = self
 	def out(self, screen, cx, cy, vx, vy):
+		"""
+		Given a curses screen and a pair of points (cx, cy) and (vx, vy) -
+		representing, respectively, the center of view and the view
+		distance (?), draws the map on the screen.
+		"""
 		for j in range(vy):
 			y = j + cy - int(vy // 2) + 1
 			for i in range(vx):
@@ -144,6 +164,11 @@ class Level(object):
 			if 0 <= x < vx and 0 <= y < vy and self.map[entity.y][entity.x].explored:
 				entity.draw(screen, x, y)
 	def send_signal(self, trigger, key, x, y):
+		"""
+		Given a triggering entity, a keypress and a point (x, y), sends
+		a signal to all the entities at that point, stopping once the first
+		one answer. Returns a message.
+		"""
 		for entity in self.entities:
 			if entity.x == x and entity.y == y:
 				try:
