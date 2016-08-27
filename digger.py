@@ -135,7 +135,6 @@ class Level(object):
 				x = i + cx - int(vx // 2) + 1
 				if 0 <= x < self.width and 0 <= y < self.height:
 					self.map[y][x].draw(screen, i, j)
-					#screen.addstr(j, i, str(self.map[y][x]))
 				else:
 					#Draw unexplored
 					screen.addstr(j, i, ' ')
@@ -143,7 +142,6 @@ class Level(object):
 			x = (entity.x - cx) + int(vx // 2) - 1
 			y = (entity.y - cy) + int(vy // 2) - 1
 			if 0 <= x < vx and 0 <= y < vy and self.map[entity.y][entity.x].explored:
-				#screen.addstr(y, x, entity.char)
 				entity.draw(screen, x, y)
 	def send_signal(self, trigger, key, x, y):
 		for entity in self.entities:
@@ -152,7 +150,7 @@ class Level(object):
 					signaled, message = entity.signal(trigger, key)
 					if signaled:
 						return message
-				except:
+				except AttributeError:
 					pass
 		return ""
 
@@ -171,7 +169,6 @@ def main(stdscr):
 	level.generate(ore_amount=50)
 	player = Player("@", 25, 25, digger=1)
 	level.add_entity(Market(25, 25))
-	#level.add_entity(Ore("*", 24, 24, "iron"))
 	level.add_entity(player)
 	player.explore(player.x, player.y)
 	x, y = 25, 25
