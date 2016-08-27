@@ -222,24 +222,3 @@ def main(stdscr):
 
 if __name__ == "__main__":
 	curses.wrapper(main)
-
-def choice_out_of(width, choices, default):
-	from random import randint
-	what = randint(1, width)
-	if type(choices) is dict:
-		choices = list(choices.items())
-	running_sum = 0
-	for i, (item, weight) in enumerate(choices):
-		running_sum += weight
-		if what < running_sum:
-			return item
-	return default
-
-if __name__ == "__main__":
-	print(choice_out_of(100, {
-		"iron": 25,
-		"copper": 10,
-		"tin": 5,
-		"silver": 2,
-		"gold": 1
-	}, "earth"))
